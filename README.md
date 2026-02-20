@@ -1,61 +1,101 @@
-# Enhanced NFT Tracker with OOX Marketplace Integration
+# NFT Analytics Dashboard
 
-## Overview
-The NFT tracker has been enhanced with OOX Marketplace API integration, providing:
-- Real-time floor prices from OOX marketplace
-- Collection statistics from MultiversX API
-- Enhanced Discord reports with marketplace links
-- Automated data collection
+A real-time NFT analytics dashboard for MultiversX collections, built with HTML, JavaScript, and Node.js.
 
-## Files
-- `enhanced_nft_tracker.py` - Main enhanced tracker
-- `oox_integration.py` - OOX Marketplace API client
-- `run_enhanced_tracker.sh` - Bash script to run tracker
-- `nft_floor_tracker.py` - Compatibility wrapper
-- `post_nft_report.py` - Discord posting utility
+## Features
 
-## Usage
+- **Real-time NFT Data**: Fetches live data from MultiversX blockchain
+- **Collection Analytics**: Floor prices, holder counts, listed percentages
+- **Multi-Marketplace Support**: XOXNO and OOX marketplace integration
+- **Responsive Design**: Works on desktop and mobile devices
+- **Simple Deployment**: Single HTML file with optional Node.js server
 
-### Run Enhanced Tracker
+## Live Demo
+
+Visit: [https://hodltokenclub-pixel.github.io/nft-analytics-dashboard/](https://hodltokenclub-pixel.github.io/nft-analytics-dashboard/)
+
+## Quick Start
+
+### Option 1: Static HTML (No Server)
+Simply open `index.html` in your browser. The dashboard will fetch data directly from public APIs.
+
+### Option 2: With Node.js Server
 ```bash
-./run_enhanced_tracker.sh
-# or
-python3 enhanced_nft_tracker.py
+# Clone the repository
+git clone https://github.com/hodltokenclub-pixel/nft-analytics-dashboard.git
+cd nft-analytics-dashboard
+
+# Install dependencies (none required, but Node.js is needed for the server)
+npm install
+
+# Start the server
+npm start
+
+# Open your browser to http://localhost:3000
 ```
 
-### Run Compatibility Wrapper
-```bash
-python3 nft_floor_tracker.py  # Uses old name, runs enhanced tracker
+## API Endpoints
+
+The dashboard fetches data from:
+- **MultiversX API**: `https://api.multiversx.com/collections/{collection}/stats`
+- **XOXNO API**: `https://api.xoxno.com/getCollectionFloorPrice/{collection}`
+- **OOX API**: `https://api.oox.art/collection/{collection}`
+
+## Supported Collections
+
+Default collections:
+- **Empyreans**: `EMP-897b49`
+- **GH-NFT Voucher**: `GHNFTFMV-0f8770`
+- **HF-NFT**: `FHODL-a9ad67`
+
+## Project Structure
+
+```
+nft-analytics-dashboard/
+├── index.html          # Main dashboard interface
+├── server.js           # Optional Node.js server
+├── package.json        # Node.js dependencies
+└── README.md           # This file
 ```
 
-### Post to Discord
-```bash
-python3 post_nft_report.py
-```
+## Technologies Used
 
-## Scheduled Runs
-Add to crontab for daily updates:
-```bash
-0 9 * * * cd /home/ubuntu/.openclaw/workspace && ./run_enhanced_tracker.sh
-```
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
+- **APIs**: MultiversX, XOXNO, OOX Marketplace
+- **Server**: Node.js (optional)
+- **Styling**: Custom CSS with modern design
 
-## Data Sources
-1. **OOX Marketplace API** (https://api.oox.art/)
-   - Floor prices
-   - NFT listings
-   - Collection stats
-   - Marketplace URLs
+## Development
 
-2. **MultiversX API** (https://api.multiversx.com/)
-   - Holder counts
-   - Total NFTs
-   - Verification status
-   - EGLD price
+To modify the dashboard:
 
-## Collections Tracked
-- Empyreans (EMP-897b49)
-- GH-NFT Voucher (GHNFTFMV-0f8770)
-- HF-NFT (FHODL-a9ad67)
+1. Edit `index.html` for UI changes
+2. Modify JavaScript functions in the `<script>` section for logic changes
+3. Update `server.js` if you need custom API endpoints
 
-## Backup
-Original files backed up to: `backup_nft_tracker/`
+## Deployment
+
+### GitHub Pages
+1. Push to the `gh-pages` branch
+2. Enable GitHub Pages in repository settings
+3. Set source to `gh-pages` branch
+
+### Self-Hosted
+1. Upload all files to your web server
+2. Ensure CORS headers are properly configured if using APIs
+3. For production, consider adding caching and rate limiting
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## Support
+
+For issues or questions, please open an issue on GitHub.

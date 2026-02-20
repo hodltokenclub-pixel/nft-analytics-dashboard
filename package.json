@@ -1,0 +1,17 @@
+{
+  "name": "nft-analytics-dashboard",
+  "version": "1.0.0",
+  "description": "NFT Analytics Dashboard for MultiversX collections",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["multiversx", "nft", "analytics", "dashboard", "blockchain"],
+  "author": "HODL Token Club",
+  "license": "MIT",
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
