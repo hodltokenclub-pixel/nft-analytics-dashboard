@@ -1,0 +1,305 @@
+            document.getElementById('collectionIdentifier').textContent = data.collection;
+            
+            // Verified badge
+            const verifiedBadge = document.getElementById('verifiedBadge');
+            if (data.data?.isVerified) {
+                verifiedBadge.style.display = 'inline-block';
+            } else {
+                verifiedBadge.style.display = 'none';
+            }
+            
+            // Marketplace link
+            const marketplaceLink = document.getElementById('marketplaceLink');
+            marketplaceLink.href = `https://xoxno.com/collection/${data.collection}`;
+            
+            // Stats
+            document.getElementById('floorPrice').textContent = 
+                data.data?.floorPrice ? `${data.data.floorPrice.toFixed(3)} EGLD` : 'N/A';
+            document.getElementById('floorSource').textContent = 
+                `Source: ${data.data?.floorPriceSource?.toUpperCase() || 'N/A'}`;
+            
+            document.getElementById('holderCount').textContent = 
+                data.data?.holderCount ? data.data.holderCount.toLocaleString() : 'N/A';
+            document.getElementById('avgPerHolder').textContent = 
+                data.data?.averagePerHolder ? `Avg: ${data.data.averagePerHolder} NFTs` : '';
+            
+            document.getElementById('listedCount').textContent = 
+                data.data?.nftsListed && data.data?.totalNfts ? 
+                `${data.data.nftsListed.toLocaleString()}/${data.data.totalNfts.toLocaleString()}` : 'N/A';
+            document.getElementById('listedPercentage').textContent = 
+                data.data?.listedPercentage ? `${data.data.listedPercentage}% of supply` : '';
+            
+            document.getElementById('totalVolume').textContent = 
+                data.data?.totalVolume ? `${data.data.totalVolume.toFixed(2)} EGLD` : 'N/A';
+            document.getElementById('averagePrice').textContent = 
+                data.data?.averagePrice ? `Avg: ${data.data.averagePrice.toFixed(3)} EGLD` : '';
+            
+            // Data sources
+            const sources = [];
+            if (data.sources?.xoxno) sources.push('XOXNO');
+            if (data.sources?.oox) sources.push('OOX');
+            if (data.sources?.multiversx) sources.push('MultiversX');
+            document.getElementById('dataSources').textContent = sources.join(' • ');
+            
+            // Last updated
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = 
+                now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Load listings
+        async function loadListings(collectionId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/nft/collection/${collectionId}/listings?limit=10`);
+                const data = await response.json();
+                
+                if (data.success && data.data?.data) {
+                    updateListingsTable(data.data.data);
+                }
+            } catch (error) {
+                console.error('Error loading listings:', error);
+                // Don't show error for listings - they're secondary
+            }
+        }
+
+        // Update listings table
+        function updateListingsTable(listings) {
+            const tableBody = document.getElementById('listingsTable');
+            tableBody.innerHTML = '';
+            
+            if (!listings || listings.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">
+                            No current listings found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            listings.slice(0, 10).forEach((nft, index) => {
+                const nftName = nft.metadata?.name || `NFT #${index + 1}`;
+                const nftPrice = nft.price ? `${nft.price.toFixed(3)} EGLD` : 'Price not available';
+                const rarityRank = nft.rarityRank ? `#${nft.rarityRank}` : 'N/A';
+                
+                // Extract first 2 traits
+                let traits = 'N/A';
+                if (nft.metadata?.attributes && nft.metadata.attributes.length > 0) {
+                    traits = nft.metadata.attributes.slice(0, 2)
+                        .map(attr => attr.value)
+                        .join(', ');
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${nftName}</td>
+                    <td><strong>${nftPrice}</strong></td>
+                    <td>${rarityRank}</td>
+                    <td>${traits}</td>
+                    <td>
+                        <a href="https://xoxno.com/nft/${nft.identifier}" 
+                           target="_blank" 
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Destroy existing charts
+            if (holderChart) holderChart.destroy();
+            if (priceChart) priceChart.destroy();
+            
+            // Mock data for charts (would come from API in production)
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            
+            // Holder growth data (mock - would be real historical data)
+            const holderData = {
+                labels: days,
+                datasets: [{
+                    label: 'Holder Count',
+                    data: [142, 143, 144, 144, 145, 145, 145],
+                    borderColor: '#23f7dd',
+                    backgroundColor: 'rgba(35, 247, 221, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            };
+            
+            // Price history data (mock - would be real historical data)
+            const priceData = {
+                labels: days,
+                datasets: [{
+                    label: 'Floor Price (EGLD)',
+                    data: [0.42, 0.43, 0.41, 0.45, 0.44, 0.46, 0.438],
+                    borderColor: '#ff6b6b',
+                    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            };
+            
+            // Create holder chart
+            const holderCtx = document.getElementById('holderChart').getContext('2d');
+            holderChart = new Chart(holderCtx, {
+                type: 'line',
+                data: holderData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#b0b0b0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#b0b0b0'
+                            },
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+            
+            // Create price chart
+            const priceCtx = document.getElementById('priceChart').getContext('2d');
+            priceChart = new Chart(priceCtx, {
+                type: 'line',
+                data: priceData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            callbacks: {
+                                label: function(context) {
+                                    return `Price: ${context.parsed.y.toFixed(3)} EGLD`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#b0b0b0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#b0b0b0',
+                                callback: function(value) {
+                                    return value.toFixed(3) + ' EGLD';
+                                }
+                            },
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Connect wallet (mock implementation)
+        function connectWallet() {
+            // In production, this would use MultiversX wallet connect
+            // For now, using mock data
+            connectedWallet = 'erd1...mock';
+            
+            // Show wallet section with mock data
+            document.getElementById('walletSection').style.display = 'block';
+            document.getElementById('ownedCount').textContent = '3';
+            document.getElementById('portfolioValue').textContent = '1.314 EGLD';
+            document.getElementById('portfolioPnl').textContent = '+0.054 EGLD';
+            document.getElementById('portfolioPercentage').textContent = '+4.1%';
+            
+            // Update button
+            const button = document.querySelector('.btn-outline-primary');
+            button.innerHTML = '<i class="fas fa-check-circle me-2"></i>Connected';
+            button.classList.remove('btn-outline-primary');
+            button.classList.add('btn-success');
+            button.disabled = true;
+            
+            // Show notification
+            alert('Wallet connected successfully! (Mock implementation)\n\nIn production, this would:\n1. Connect to xPortal/MultiversX wallet\n2. Fetch your NFT holdings\n3. Calculate portfolio value\n4. Show personalized analytics');
+        }
+
+        // UI Helper Functions
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('dashboard').style.display = 'block';
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            if (document.getElementById('collectionSelect').value !== 'custom') {
+                loadCollectionData();
+            }
+        }, 300000); // 5 minutes
+
+        // Initial load
+        loadCollectionData();
+    </script>
+</body>
+</html>
